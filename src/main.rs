@@ -1,3 +1,32 @@
-fn main() {
-    println!("Hello, world!");
+mod commands;
+
+use clap::Parser;
+
+#[derive(clap::Parser)]
+#[command(arg_required_else_help = true)]
+/// Zig version mangager
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Command,
+}
+
+#[derive(Debug, PartialEq, Eq, clap::Subcommand)]
+pub enum Command {
+    /// Check available versions or a specific version
+    Check {
+        /// Specific version
+        version: Option<String>,
+    },
+}
+
+fn main() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+
+    match cli.command {
+        Command::Check { version: _ } => {
+            commands::check::execute()?;
+        }
+    }
+
+    Ok(())
 }

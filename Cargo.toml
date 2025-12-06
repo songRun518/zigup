@@ -11,3 +11,6 @@ strip = true
 [dependencies]
 anyhow = "1.0.100"
 clap = { version = "4.5.53", features = ["derive"] }
+colored = "3.0.0"
+reqwest = { version = "0.12.24", features = ["blocking"] }
+scraper = "0.24.0"
