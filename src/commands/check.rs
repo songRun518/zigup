@@ -1,3 +1,3 @@
 pub fn execute() -> anyhow::Result<()> {
-    Ok(())
+        Ok(())
 }

@@ -6,34 +6,34 @@ use clap::Parser;
 #[command(arg_required_else_help = true)]
 /// Zig version mangager
 pub struct Cli {
-    #[command(subcommand)]
-    pub command: Command,
+        #[command(subcommand)]
+        pub command: Command,
 }
 
 #[derive(Debug, PartialEq, Eq, clap::Subcommand)]
 pub enum Command {
-    /// Update local cache
-    Update,
+        /// Update local cache
+        Update,
 
-    /// Check available versions or a specific version
-    Check {
-        /// Specific version
-        version: Option<String>,
-    },
+        /// Check available versions or a specific version
+        Check {
+                /// Specific version
+                version: Option<String>,
+        },
 }
 
 fn main() -> anyhow::Result<()> {
-    let cli = Cli::parse();
+        let cli = Cli::parse();
 
-    match cli.command {
-        Command::Update => {
-            commands::update::execute()?;
+        match cli.command {
+                Command::Update => {
+                        commands::update::execute()?;
+                }
+
+                Command::Check { version: _ } => {
+                        commands::check::execute()?;
+                }
         }
 
-        Command::Check { version: _ } => {
-            commands::check::execute()?;
-        }
-    }
-
-    Ok(())
+        Ok(())
 }
