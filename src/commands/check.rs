@@ -1,3 +1,5 @@
+use colored::Colorize;
+
 use crate::cache::Cache;
 
 pub fn execute(specific: Option<String>) -> anyhow::Result<()> {
@@ -10,10 +12,10 @@ pub fn execute(specific: Option<String>) -> anyhow::Result<()> {
         if let Some(specific) = specific {
                 for version in &cache {
                         if version.version == specific {
-                                println!("{}  ({})", version.version, version.date);
-                                println!("\nAvailable architecture:");
-                                for durl in &version.download_urls {
-                                        println!("  {}", durl.arch);
+                                println!("{}  ({})", version.version.bold().cyan(), version.date);
+                                println!("\n{}", "Available architecture:".bold().underline());
+                                for du in &version.download_urls {
+                                        println!("  {}", du.arch.italic().purple());
                                 }
                                 break;
                         }
@@ -27,7 +29,7 @@ pub fn execute(specific: Option<String>) -> anyhow::Result<()> {
                 for version in &cache {
                         println!(
                                 "{}{}  ({})",
-                                version.version,
+                                version.version.bold().cyan(),
                                 " ".repeat(width - version.version.len()),
                                 version.date
                         );
