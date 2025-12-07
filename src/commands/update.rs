@@ -52,11 +52,11 @@ pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
                 })
         }
 
-        let cache_file = std::env::current_dir()
+        let cache = std::env::current_dir()
                 .context("Failed to obtain current dir")?
                 .join(".zigup");
         std::fs::write(
-                &cache_file,
+                &cache,
                 serde_json::to_vec_pretty(&versions_info).context("Failed to serialize cache")?,
         )
         .context("Failed to write cache")?;
