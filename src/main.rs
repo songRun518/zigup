@@ -31,8 +31,8 @@ fn main() -> anyhow::Result<()> {
                         commands::update::execute()?;
                 }
 
-                Command::Check { version: _ } => {
-                        commands::check::execute()?;
+                Command::Check { version } => {
+                        commands::check::execute(version)?;
                 }
         }
 

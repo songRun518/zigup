@@ -17,16 +17,16 @@ pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
         .context("Failed to deserialize version list")?;
 
         let mut versions_info = Vec::new();
-        for (version, value) in version_list {
-                let Value::Object(info) = value else {
+        for (version, info) in version_list {
+                let Value::Object(info) = info else {
                         unreachable!()
                 };
 
                 let date = info.get("date").unwrap().as_str().unwrap().to_string();
 
                 let mut download_urls = Vec::new();
-                for (arch, v) in info {
-                        let Value::Object(url_group) = v else {
+                for (arch, urls) in info {
+                        let Value::Object(urls) = urls else {
                                 continue;
                         };
 
@@ -36,12 +36,7 @@ pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
 
                         download_urls.push(DownloadUrl {
                                 arch,
-                                url: url_group
-                                        .get("tarball")
-                                        .unwrap()
-                                        .as_str()
-                                        .unwrap()
-                                        .to_string(),
+                                url: urls.get("tarball").unwrap().as_str().unwrap().to_string(),
                         });
                 }
 
