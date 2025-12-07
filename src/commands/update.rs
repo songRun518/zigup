@@ -2,11 +2,11 @@ use anyhow::Context;
 use reqwest::blocking;
 use serde_json::{Map, Value};
 
-use crate::commands::{DownloadUrl, VersionInfo};
+use crate::cache::{Cache, DownloadUrl, VersionInfo};
 
 pub const VERSIONS_URL: &str = "https://ziglang.org/download/index.json";
 
-pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
+pub fn execute() -> anyhow::Result<(Vec<VersionInfo>, Cache)> {
         let response = blocking::get(VERSIONS_URL).context("Failed to download version list")?;
 
         let version_list: Map<String, Value> = serde_json::from_slice(
@@ -52,14 +52,8 @@ pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
                 })
         }
 
-        let cache = std::env::current_dir()
-                .context("Failed to obtain current dir")?
-                .join(".zigup");
-        std::fs::write(
-                &cache,
-                serde_json::to_vec_pretty(&versions_info).context("Failed to serialize cache")?,
-        )
-        .context("Failed to write cache")?;
+        let mut cache = Cache::new()?;
+        cache.serialize(&versions_info)?;
 
-        Ok(versions_info)
+        Ok((versions_info, cache))
 }

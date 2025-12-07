@@ -1,3 +1,4 @@
+mod cache;
 mod commands;
 
 use clap::Parser;
