@@ -9,9 +9,9 @@ pub fn execute(specific: Option<String>) -> anyhow::Result<()> {
 
         if let Some(specific) = specific {
                 for version in &cache {
-                        println!("{}  ({})", version.version, version.date);
-                        println!("\nAvailable architecture:");
                         if version.version == specific {
+                                println!("{}  ({})", version.version, version.date);
+                                println!("\nAvailable architecture:");
                                 for durl in &version.download_urls {
                                         println!("  {}", durl.arch);
                                 }
