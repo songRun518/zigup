@@ -57,7 +57,7 @@ pub fn execute() -> anyhow::Result<()> {
         .join(".zigup");
     std::fs::write(
         &cache_file,
-        serde_json::to_vec(&versions).context("Failed to serialize cache")?,
+        serde_json::to_vec_pretty(&versions).context("Failed to serialize cache")?,
     )
     .context("Failed to write cache")?;
 
