@@ -1,45 +1,65 @@
 use anyhow::Context;
 use reqwest::blocking;
-use scraper::{Html, Selector};
+use serde_json::{Map, Value};
 
-pub const ZIG_DOWNLOAD_PAGE: &str = "https://ziglang.org/download/";
+use crate::commands::{DownloadUrl, VersionInfo};
+
+pub const VERSIONS_URL: &str = "https://ziglang.org/download/index.json";
 
 pub fn execute() -> anyhow::Result<()> {
-    let response = blocking::get(ZIG_DOWNLOAD_PAGE).context("Failed to get zig download page")?;
+    let response = blocking::get(VERSIONS_URL).context("Failed to download version list")?;
 
-    let page = Html::parse_document(
+    let version_list: Map<String, Value> = serde_json::from_slice(
         &response
-            .text()
-            .context("Failed to get zig download page text")?,
-    );
+            .bytes()
+            .context("Failed to obtain bytes of version list")?,
+    )
+    .context("Failed to deserialize version list")?;
 
-    let version_list = page
-        .select(&Selector::parse("body div#content div.container div").unwrap())
-        .next_back()
-        .unwrap();
+    let mut versions = Vec::new();
+    for (version, value) in version_list {
+        let Value::Object(info) = value else {
+            unreachable!()
+        };
 
-    let versions = version_list
-        .select(&Selector::parse("h2").unwrap())
-        .map(|ele| ele.inner_html())
-        .collect::<Vec<_>>();
+        let date = info.get("date").unwrap().as_str().unwrap().to_string();
 
-    let times = version_list
-        .select(&Selector::parse("ul").unwrap())
-        .map(|ul| {
-            ul.select(&Selector::parse("li").unwrap())
-                .next()
-                .unwrap()
-                .inner_html()
+        let mut download_urls = Vec::new();
+        for (arch, v) in info {
+            let Value::Object(url_group) = v else {
+                continue;
+            };
+
+            if arch.as_str() == "src" || arch.as_str() == "bootstrap" {
+                continue;
+            }
+
+            download_urls.push(DownloadUrl {
+                arch,
+                url: url_group
+                    .get("tarball")
+                    .unwrap()
+                    .as_str()
+                    .unwrap()
+                    .to_string(),
+            });
+        }
+
+        versions.push(VersionInfo {
+            version,
+            date,
+            download_urls,
         })
-        .collect::<Vec<_>>();
+    }
 
-    // let cache_dir = std::env::current_dir()
-    //     .context("Failed to get current dir")?
-    //     .join(".zigup");
-
-    // if !cache_dir.exists() {
-    //     std::fs::create_dir_all(&cache_dir).context("Failed to create cache dir")?;
-    // }
+    let cache_file = std::env::current_dir()
+        .context("Failed to obtain current dir")?
+        .join(".zigup");
+    std::fs::write(
+        &cache_file,
+        serde_json::to_vec(&versions).context("Failed to serialize cache")?,
+    )
+    .context("Failed to write cache")?;
 
     Ok(())
 }
