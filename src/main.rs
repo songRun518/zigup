@@ -12,6 +12,9 @@ pub struct Cli {
 
 #[derive(Debug, PartialEq, Eq, clap::Subcommand)]
 pub enum Command {
+    /// Update local cache
+    Update,
+
     /// Check available versions or a specific version
     Check {
         /// Specific version
@@ -23,6 +26,10 @@ fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match cli.command {
+        Command::Update => {
+            commands::update::execute()?;
+        }
+
         Command::Check { version: _ } => {
             commands::check::execute()?;
         }
