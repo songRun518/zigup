@@ -6,7 +6,7 @@ use crate::cache::{Cache, DownloadUrl, VersionInfo};
 
 pub const VERSIONS_URL: &str = "https://ziglang.org/download/index.json";
 
-pub fn execute() -> anyhow::Result<(Vec<VersionInfo>, Cache)> {
+pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
         let response = blocking::get(VERSIONS_URL).context("Failed to download version list")?;
 
         let version_list: Map<String, Value> = serde_json::from_slice(
@@ -52,8 +52,7 @@ pub fn execute() -> anyhow::Result<(Vec<VersionInfo>, Cache)> {
                 })
         }
 
-        let mut cache = Cache::new()?;
-        cache.serialize(&versions_info)?;
+        Cache::serialize(&versions_info)?;
 
-        Ok((versions_info, cache))
+        Ok(versions_info)
 }

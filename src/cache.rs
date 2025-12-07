@@ -1,4 +1,4 @@
-use std::io::{Read, Seek, Write};
+use std::path::PathBuf;
 
 use anyhow::Context;
 
@@ -16,66 +16,24 @@ pub struct DownloadUrl {
 }
 
 #[derive(Debug)]
-pub struct Cache {
-        inner: std::fs::File,
-}
+pub struct Cache;
 impl Cache {
-        pub const FILENAME: &str = ".zigup";
+        pub const NAME: &str = ".zigup";
 
-        pub fn new() -> anyhow::Result<Self> {
-                let path = std::env::current_dir()
+        pub fn path() -> anyhow::Result<PathBuf> {
+                Ok(std::env::current_dir()
                         .context("Failed to obtain current dir")?
-                        .join(Self::FILENAME);
-
-                let inner = if path.exists() {
-                        std::fs::File::options()
-                                .read(true)
-                                .write(true)
-                                .open(&path)
-                                .context("Failed to open cache")?
-                } else {
-                        std::fs::File::create_new(&path).context("Failed to create cache")?
-                };
-
-                Ok(Self { inner })
+                        .join(Self::NAME))
         }
 
-        pub fn restore_offset(&mut self) -> anyhow::Result<()> {
-                self.inner
-                        .seek(std::io::SeekFrom::Start(0))
-                        .context("Failed to seek cache")?;
-                Ok(())
-        }
-
-        pub fn read(&mut self) -> anyhow::Result<Vec<u8>> {
-                self.restore_offset()?;
-
-                let mut buf = Vec::new();
-                self.inner
-                        .read_to_end(&mut buf)
-                        .context("Failed to read cache")?;
-                Ok(buf)
-        }
-
-        pub fn deserialize(&mut self) -> anyhow::Result<Vec<VersionInfo>> {
-                let bytes = self.read()?;
+        pub fn deserialize() -> anyhow::Result<Vec<VersionInfo>> {
+                let bytes = std::fs::read(Self::path()?).context("Failed to read cache")?;
                 serde_json::from_slice(&bytes).context("Failed to deserialize cache")
         }
 
-        pub fn write(&mut self, bytes: impl AsRef<[u8]>) -> anyhow::Result<()> {
-                self.restore_offset()?;
-
-                self.inner
-                        .set_len(0)
-                        .context("Failed to set length of cache")?;
-                self.inner
-                        .write_all(bytes.as_ref())
-                        .context("Failed to write cache")
-        }
-
-        pub fn serialize(&mut self, versions_info: &[VersionInfo]) -> anyhow::Result<()> {
+        pub fn serialize(versions_info: &[VersionInfo]) -> anyhow::Result<()> {
                 let bytes = serde_json::to_vec_pretty(&versions_info)
                         .context("Failed to serialize cache")?;
-                self.write(&bytes)
+                std::fs::write(Self::path()?, &bytes).context("Failed to write cache")
         }
 }
