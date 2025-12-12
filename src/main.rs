@@ -1,5 +1,5 @@
 mod cache;
-mod commands;
+mod cmd;
 
 use clap::Parser;
 
@@ -8,11 +8,11 @@ use clap::Parser;
 /// Zig version mangager
 pub struct Cli {
         #[command(subcommand)]
-        pub command: Command,
+        pub cmd: Cmd,
 }
 
 #[derive(Debug, PartialEq, Eq, clap::Subcommand)]
-pub enum Command {
+pub enum Cmd {
         /// Update local cache
         Update,
 
@@ -26,13 +26,13 @@ pub enum Command {
 fn main() {
         let cli = Cli::parse();
 
-        match cli.command {
-                Command::Update => {
-                        commands::update::execute();
+        match cli.cmd {
+                Cmd::Update => {
+                        cmd::update::execute();
                 }
 
-                Command::Check { version } => {
-                        commands::check::execute(version);
+                Cmd::Check { version } => {
+                        cmd::check::execute(version);
                 }
         }
 }
