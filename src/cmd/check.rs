@@ -1,12 +1,12 @@
 use colored::Colorize;
 
-use crate::cache::Cache;
+use crate::cache;
 
 pub fn execute(specific: Option<String>) {
-    let cache = if !Cache::path().exists() {
+    let cache = if !cache::path().exists() {
         super::update::execute()
     } else {
-        Cache::deserialize()
+        cache::deserialize()
     };
 
     if let Some(specific) = specific {
@@ -14,7 +14,7 @@ pub fn execute(specific: Option<String>) {
             if version.version == specific {
                 println!("{}  ({})", version.version.bold().cyan(), version.date);
                 println!("\n{}", "Available architecture:".bold().underline());
-                for du in &version.download_urls {
+                for du in &version.arch_and_url {
                     println!("  {}", du.arch.italic().purple());
                 }
                 break;
