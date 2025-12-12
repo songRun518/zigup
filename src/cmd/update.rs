@@ -6,47 +6,47 @@ use crate::cache::{Cache, DownloadUrl, VersionInfo};
 pub const VERSIONS_URL: &str = "https://ziglang.org/download/index.json";
 
 pub fn execute() -> Vec<VersionInfo> {
-        let response = blocking::get(VERSIONS_URL).expect("Failed to download version list");
+    let response = blocking::get(VERSIONS_URL).expect("Failed to download version list");
 
-        let version_list: Map<String, Value> = serde_json::from_slice(
-                &response
-                        .bytes()
-                        .expect("Failed to obtain bytes of version list"),
-        )
-        .expect("Failed to deserialize version list");
+    let version_list: Map<String, Value> = serde_json::from_slice(
+        &response
+            .bytes()
+            .expect("Failed to obtain bytes of version list"),
+    )
+    .expect("Failed to deserialize version list");
 
-        let mut versions_info = Vec::new();
-        for (version, info) in version_list {
-                let Value::Object(info) = info else {
-                        unreachable!()
-                };
+    let mut versions_info = Vec::new();
+    for (version, info) in version_list {
+        let Value::Object(info) = info else {
+            unreachable!()
+        };
 
-                let date = info.get("date").unwrap().as_str().unwrap().to_string();
+        let date = info.get("date").unwrap().as_str().unwrap().to_string();
 
-                let mut download_urls = Vec::new();
-                for (arch, urls) in info {
-                        let Value::Object(urls) = urls else {
-                                continue;
-                        };
+        let mut download_urls = Vec::new();
+        for (arch, urls) in info {
+            let Value::Object(urls) = urls else {
+                continue;
+            };
 
-                        if arch.as_str() == "src" || arch.as_str() == "bootstrap" {
-                                continue;
-                        }
+            if arch.as_str() == "src" || arch.as_str() == "bootstrap" {
+                continue;
+            }
 
-                        download_urls.push(DownloadUrl {
-                                arch,
-                                url: urls.get("tarball").unwrap().as_str().unwrap().to_string(),
-                        });
-                }
-
-                versions_info.push(VersionInfo {
-                        version,
-                        date,
-                        download_urls,
-                })
+            download_urls.push(DownloadUrl {
+                arch,
+                url: urls.get("tarball").unwrap().as_str().unwrap().to_string(),
+            });
         }
 
-        Cache::serialize(&versions_info);
+        versions_info.push(VersionInfo {
+            version,
+            date,
+            download_urls,
+        })
+    }
 
-        versions_info
+    Cache::serialize(&versions_info);
+
+    versions_info
 }

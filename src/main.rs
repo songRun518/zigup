@@ -4,35 +4,34 @@ mod cmd;
 use clap::Parser;
 
 #[derive(clap::Parser)]
-#[command(arg_required_else_help = true)]
 /// Zig version mangager
 pub struct Cli {
-        #[command(subcommand)]
-        pub cmd: Cmd,
+    #[command(subcommand)]
+    pub cmd: Cmd,
 }
 
 #[derive(Debug, PartialEq, Eq, clap::Subcommand)]
 pub enum Cmd {
-        /// Update local cache
-        Update,
+    /// Update local cache
+    Update,
 
-        /// Check available versions or a specific version
-        Check {
-                /// Specific version
-                version: Option<String>,
-        },
+    /// Check available versions or a specific version
+    Check {
+        /// Specific version
+        version: Option<String>,
+    },
 }
 
 fn main() {
-        let cli = Cli::parse();
+    let cli = Cli::parse();
 
-        match cli.cmd {
-                Cmd::Update => {
-                        cmd::update::execute();
-                }
-
-                Cmd::Check { version } => {
-                        cmd::check::execute(version);
-                }
+    match cli.cmd {
+        Cmd::Update => {
+            cmd::update::execute();
         }
+
+        Cmd::Check { version } => {
+            cmd::check::execute(version);
+        }
+    }
 }
