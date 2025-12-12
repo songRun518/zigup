@@ -23,18 +23,16 @@ pub enum Command {
         },
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() {
         let cli = Cli::parse();
 
         match cli.command {
                 Command::Update => {
-                        commands::update::execute()?;
+                        commands::update::execute();
                 }
 
                 Command::Check { version } => {
-                        commands::check::execute(version)?;
+                        commands::check::execute(version);
                 }
         }
-
-        Ok(())
 }

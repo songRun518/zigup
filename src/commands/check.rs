@@ -2,11 +2,11 @@ use colored::Colorize;
 
 use crate::cache::Cache;
 
-pub fn execute(specific: Option<String>) -> anyhow::Result<()> {
-        let cache = if !Cache::path()?.exists() {
-                super::update::execute()?
+pub fn execute(specific: Option<String>) {
+        let cache = if !Cache::path().exists() {
+                super::update::execute()
         } else {
-                Cache::deserialize()?
+                Cache::deserialize()
         };
 
         if let Some(specific) = specific {
@@ -35,6 +35,4 @@ pub fn execute(specific: Option<String>) -> anyhow::Result<()> {
                         );
                 }
         }
-
-        Ok(())
 }

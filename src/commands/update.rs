@@ -1,4 +1,3 @@
-use anyhow::Context;
 use reqwest::blocking;
 use serde_json::{Map, Value};
 
@@ -6,15 +5,15 @@ use crate::cache::{Cache, DownloadUrl, VersionInfo};
 
 pub const VERSIONS_URL: &str = "https://ziglang.org/download/index.json";
 
-pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
-        let response = blocking::get(VERSIONS_URL).context("Failed to download version list")?;
+pub fn execute() -> Vec<VersionInfo> {
+        let response = blocking::get(VERSIONS_URL).expect("Failed to download version list");
 
         let version_list: Map<String, Value> = serde_json::from_slice(
                 &response
                         .bytes()
-                        .context("Failed to obtain bytes of version list")?,
+                        .expect("Failed to obtain bytes of version list"),
         )
-        .context("Failed to deserialize version list")?;
+        .expect("Failed to deserialize version list");
 
         let mut versions_info = Vec::new();
         for (version, info) in version_list {
@@ -47,7 +46,7 @@ pub fn execute() -> anyhow::Result<Vec<VersionInfo>> {
                 })
         }
 
-        Cache::serialize(&versions_info)?;
+        Cache::serialize(&versions_info);
 
-        Ok(versions_info)
+        versions_info
 }
