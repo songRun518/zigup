@@ -16,10 +16,10 @@ pub enum Cmd {
     Update,
 
     /// Check available versions or a specific version
-    Check {
-        /// Specific version
-        version: Option<String>,
-    },
+    Check { version: Option<String> },
+
+    /// Download a specific version
+    Download { version: String, platform: String },
 }
 
 fn main() {
@@ -32,6 +32,10 @@ fn main() {
 
         Cmd::Check { version } => {
             cmd::check::execute(version);
+        }
+
+        Cmd::Download { version, platform } => {
+            cmd::versions::download(version, platform);
         }
     }
 }
