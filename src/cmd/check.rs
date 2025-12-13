@@ -1,38 +1,29 @@
 use colored::Colorize;
 
-use crate::cache;
+use crate::config::Config;
 
-pub fn execute(specific: Option<String>) {
-    let cache = if !cache::path().exists() {
-        super::update::execute()
-    } else {
-        cache::deserialize()
-    };
+pub fn execute(version: Option<String>) {
+    let mut config = Config::load();
+    if config.versions_info.is_none() {
+        config = super::update::execute();
+    }
 
-    if let Some(specific) = specific {
-        for version in &cache {
+    let versions_info = config.versions_info.clone().unwrap();
+
+    if let Some(specific) = version {
+        for version in &versions_info {
             if version.version == specific {
-                println!("{}  ({})", version.version.bold().cyan(), version.date);
+                println!("{}  ({})", version.version.cyan().bold(), version.date);
                 println!("\n{}", "Available architecture:".bold().underline());
-                for du in &version.arch_and_url {
+                for du in &version.arch_specific {
                     println!("  {}", du.arch.italic().purple());
                 }
                 break;
             }
         }
     } else {
-        let width = cache
-            .iter()
-            .map(|v| v.version.len())
-            .max()
-            .expect("Failed to calculate max width of version");
-        for version in &cache {
-            println!(
-                "{}{}  ({})",
-                version.version.bold().cyan(),
-                " ".repeat(width - version.version.len()),
-                version.date
-            );
+        for version in &versions_info {
+            println!("{}    ({})", version.version.cyan().bold(), version.date);
         }
     }
 }

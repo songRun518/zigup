@@ -1,5 +1,5 @@
-mod cache;
 mod cmd;
+mod config;
 
 use clap::Parser;
 
