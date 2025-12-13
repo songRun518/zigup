@@ -29,12 +29,12 @@ impl Config {
 pub struct VersionInfo {
     pub version: String,
     pub date: String,
-    pub arch_specific: Vec<ArchSpecific>,
+    pub platform_specific: Vec<PlatformSpecific>,
 }
 
 #[derive(Debug, Clone, Default, serde::Deserialize, serde::Serialize)]
-pub struct ArchSpecific {
-    pub arch: String,
+pub struct PlatformSpecific {
+    pub platform: String,
     pub url: String,
 }
 

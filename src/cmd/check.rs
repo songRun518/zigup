@@ -13,17 +13,17 @@ pub fn execute(version: Option<String>) {
     if let Some(specific) = version {
         for version in &versions_info {
             if version.version == specific {
-                println!("{}  ({})", version.version.cyan().bold(), version.date);
-                println!("\n{}", "Available architecture:".bold().underline());
-                for du in &version.arch_specific {
-                    println!("  {}", du.arch.italic().purple());
+                println!("{}  ({})", version.version.bold(), version.date);
+                println!("\n{}", "Available platforms:".underline());
+                for du in &version.platform_specific {
+                    println!("  {}", du.platform.italic());
                 }
                 break;
             }
         }
     } else {
         for version in &versions_info {
-            println!("{}    ({})", version.version.cyan().bold(), version.date);
+            println!("{}    ({})", version.version.bold(), version.date.italic());
         }
     }
 }

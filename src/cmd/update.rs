@@ -1,7 +1,7 @@
 use reqwest::blocking;
 use serde_json::{Map, Value};
 
-use crate::config::{ArchSpecific, Config, VersionInfo};
+use crate::config::{Config, PlatformSpecific, VersionInfo};
 
 pub const URL: &str = "https://ziglang.org/download/index.json";
 
@@ -20,7 +20,7 @@ pub fn deserialize(content: &[u8]) -> Vec<VersionInfo> {
         let info = info.as_object().unwrap();
 
         let mut date = String::new();
-        let mut arch_specific = vec![];
+        let mut platform_specific = vec![];
 
         for (key, val) in info {
             match key.as_str() {
@@ -33,12 +33,12 @@ pub fn deserialize(content: &[u8]) -> Vec<VersionInfo> {
                 }
 
                 _ => {
-                    if !val.is_object() {
+                    if !key.contains('-') || !val.is_object() {
                         continue;
                     }
 
-                    arch_specific.push(ArchSpecific {
-                        arch: key.clone(),
+                    platform_specific.push(PlatformSpecific {
+                        platform: key.clone(),
                         url: val
                             .as_object()
                             .unwrap()
@@ -55,7 +55,7 @@ pub fn deserialize(content: &[u8]) -> Vec<VersionInfo> {
         versions_info.push(VersionInfo {
             version,
             date,
-            arch_specific,
+            platform_specific,
         })
     }
 
